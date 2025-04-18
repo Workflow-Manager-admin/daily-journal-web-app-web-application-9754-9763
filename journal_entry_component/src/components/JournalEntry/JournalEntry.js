@@ -12,7 +12,9 @@ import {
   Snackbar,
   Alert,
   Chip,
-  Stack
+  Stack,
+  Grid,
+  Paper
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
@@ -20,6 +22,8 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MoodIcon from '@mui/icons-material/Mood';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import UpdateIcon from '@mui/icons-material/Update';
 
 import { formatDate, validateJournalEntryData } from '../../models/JournalEntry';
 import journalService from '../../services/journalService';
@@ -226,47 +230,75 @@ const JournalEntry = ({ entry, onSave, onDelete, isNew = false, onEdit }) => {
             <Typography variant="h5" component="h2" gutterBottom>
               {title || 'Untitled Entry'}
             </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              {entry && formatDate(entry.createdAt, 'relative')}
-              {entry && entry.updatedAt > entry.createdAt && 
-                ` (Updated ${formatDate(entry.updatedAt, 'relative')})`}
-            </Typography>
             
-            {/* Display mood if available */}
-            {entry && entry.mood && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 1 }}>
-                <MoodIcon fontSize="small" color="primary" />
-                <Typography variant="body2">
-                  {getMoodDisplayName(entry.mood)}
-                </Typography>
-              </Box>
-            )}
+            {/* Metadata section with clear visual separation */}
+            <Paper 
+              variant="outlined" 
+              sx={{ 
+                p: 1.5, 
+                mb: 2, 
+                backgroundColor: 'rgba(0, 0, 0, 0.02)',
+                borderRadius: 1
+              }}
+            >
+              <Grid container spacing={2}>
+                {/* Date and time information */}
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CalendarTodayIcon fontSize="small" color="primary" />
+                    <Typography variant="body2" color="text.secondary">
+                      Created: {entry && formatDate(entry.createdAt, 'default')}
+                    </Typography>
+                  </Box>
+                  {entry && entry.updatedAt > entry.createdAt && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                      <UpdateIcon fontSize="small" color="primary" />
+                      <Typography variant="body2" color="text.secondary">
+                        Updated: {formatDate(entry.updatedAt, 'default')}
+                      </Typography>
+                    </Box>
+                  )}
+                </Grid>
+                
+                {/* Mood information */}
+                {entry && entry.mood && (
+                  <Grid item xs={12} sm={6}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <MoodIcon fontSize="small" color="primary" />
+                      <Typography variant="body2" fontWeight="medium">
+                        {getMoodDisplayName(entry.mood)}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                )}
+                
+                {/* Tags information */}
+                {entry && entry.tags && entry.tags.length > 0 && (
+                  <Grid item xs={12}>
+                    <Divider sx={{ my: 1 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <LocalOfferIcon fontSize="small" color="primary" />
+                      <Typography variant="body2" color="text.secondary" fontWeight="medium">
+                        Tags
+                      </Typography>
+                    </Box>
+                    <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                      {entry.tags.map((tag, index) => (
+                        <Chip
+                          key={index}
+                          label={tag}
+                          color="primary"
+                          size="small"
+                          sx={{ mb: 0.5 }}
+                        />
+                      ))}
+                    </Stack>
+                  </Grid>
+                )}
+              </Grid>
+            </Paper>
             
-            {/* Display tags if available */}
-            {entry && entry.tags && entry.tags.length > 0 && (
-              <Box sx={{ mt: 1, mb: 1.5 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                  <LocalOfferIcon fontSize="small" color="primary" />
-                  <Typography variant="body2" color="text.secondary">
-                    Tags:
-                  </Typography>
-                </Box>
-                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
-                  {entry.tags.map((tag, index) => (
-                    <Chip
-                      key={index}
-                      label={tag}
-                      color="primary"
-                      size="small"
-                      sx={{ mb: 0.5 }}
-                    />
-                  ))}
-                </Stack>
-              </Box>
-            )}
-            
-            <Divider sx={{ my: 1.5 }} />
-            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mt: 2 }}>
+            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
               {content || 'No content'}
             </Typography>
           </Box>
