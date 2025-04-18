@@ -10,11 +10,14 @@ import {
   AppBar,
   Toolbar,
   Grid,
-  Paper
+  Paper,
+  Tabs,
+  Tab
 } from '@mui/material';
 
 import JournalEntryList from './components/JournalEntryList';
 import JournalEntry from './components/JournalEntry/JournalEntry';
+import JournalEntryForm from './components/JournalEntryForm/JournalEntryForm';
 import { createJournalEntry } from './models/JournalEntry';
 import journalService from './services/journalService';
 
@@ -80,6 +83,9 @@ function App() {
   const [selectedEntryId, setSelectedEntryId] = useState(null);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [isNewEntry, setIsNewEntry] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [activeTab, setActiveTab] = useState(0); // 0 for view, 1 for edit/create
+=======
 
   // Load entries on component mount
   useEffect(() => {
@@ -137,6 +143,8 @@ function App() {
   const handleCreateEntry = () => {
     setSelectedEntryId(null);
     setIsNewEntry(true);
+    setShowForm(true);
+    setActiveTab(1); // Switch to edit tab
     setSelectedEntry(createJournalEntry({
       title: '',
       content: ''
@@ -151,6 +159,46 @@ function App() {
     loadEntries(); // Reload all entries
     setSelectedEntryId(savedEntry.id);
     setIsNewEntry(false);
+    setShowForm(false);
+    setActiveTab(0); // Switch back to view tab
+  };
+
+  /**
+   * Handle canceling form edit/create
+   */
+  const handleCancelForm = () => {
+    setShowForm(false);
+    setActiveTab(0); // Switch back to view tab
+    
+    if (isNewEntry) {
+      // If canceling a new entry, select the first entry if available
+      if (entries.length > 0) {
+        setSelectedEntryId(entries[0].id);
+      } else {
+        setSelectedEntry(null);
+      }
+      setIsNewEntry(false);
+    }
+  };
+
+  /**
+   * Handle tab change between view and edit modes
+   * @param {Event} event - The event object
+   * @param {number} newValue - The index of the selected tab
+   */
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    setShowForm(newValue === 1);
+  };
+
+  /**
+   * Handle editing an existing entry
+   */
+  const handleEditEntry = () => {
+    if (selectedEntry) {
+      setShowForm(true);
+      setActiveTab(1); // Switch to edit tab
+    }
   };
 
   /**
@@ -209,12 +257,34 @@ function App() {
               }}
             >
               {selectedEntry || isNewEntry ? (
-                <JournalEntry 
-                  entry={selectedEntry}
-                  onSave={handleSaveEntry}
-                  onDelete={handleDeleteEntry}
-                  isNew={isNewEntry}
-                />
+                <>
+                  {/* Tabs for switching between view and edit modes */}
+                  <Tabs 
+                    value={activeTab} 
+                    onChange={handleTabChange}
+                    sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
+                  >
+                    <Tab label="View" disabled={isNewEntry} />
+                    <Tab label={isNewEntry ? "Create" : "Edit"} />
+                  </Tabs>
+                  
+                  {/* Show either the JournalEntry view or JournalEntryForm based on activeTab */}
+                  {activeTab === 0 ? (
+                    <JournalEntry 
+                      entry={selectedEntry}
+                      onSave={handleSaveEntry}
+                      onDelete={handleDeleteEntry}
+                      isNew={isNewEntry}
+                      onEdit={handleEditEntry}
+                    />
+                  ) : (
+                    <JournalEntryForm
+                      entry={selectedEntry}
+                      onSave={handleSaveEntry}
+                      onCancel={handleCancelForm}
+                    />
+                  )}
+                </>
               ) : (
                 <Box sx={{ 
                   display: 'flex', 

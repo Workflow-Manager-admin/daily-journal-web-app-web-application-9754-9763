@@ -28,9 +28,10 @@ import journalService from '../../services/journalService';
  * @param {Function} props.onSave - Callback function called after successful save
  * @param {Function} props.onDelete - Callback function called after successful delete
  * @param {boolean} props.isNew - Whether this is a new entry being created
+ * @param {Function} props.onEdit - Callback function called when edit button is clicked
  * @returns {JSX.Element} The JournalEntry component
  */
-const JournalEntry = ({ entry, onSave, onDelete, isNew = false }) => {
+const JournalEntry = ({ entry, onSave, onDelete, isNew = false, onEdit }) => {
   // State for managing the entry data
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -55,6 +56,10 @@ const JournalEntry = ({ entry, onSave, onDelete, isNew = false }) => {
       setTitle(entry?.title || '');
       setContent(entry?.content || '');
       setErrors({});
+    } else if (onEdit && typeof onEdit === 'function') {
+      // If entering edit mode and onEdit prop is provided, call it
+      onEdit();
+      return;
     }
     setIsEditing(!isEditing);
   };
