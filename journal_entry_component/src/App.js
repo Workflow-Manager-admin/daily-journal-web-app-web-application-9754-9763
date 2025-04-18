@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ThemeProvider,
   createTheme,
@@ -8,8 +8,15 @@ import {
   Container,
   Box,
   AppBar,
-  Toolbar
+  Toolbar,
+  Grid,
+  Paper
 } from '@mui/material';
+
+import JournalEntryList from './components/JournalEntryList';
+import JournalEntry from './components/JournalEntry/JournalEntry';
+import { createJournalEntry } from './models/JournalEntry';
+import journalService from './services/journalService';
 
 const theme = createTheme({
   palette: {
@@ -69,6 +76,93 @@ const theme = createTheme({
 });
 
 function App() {
+  const [entries, setEntries] = useState([]);
+  const [selectedEntryId, setSelectedEntryId] = useState(null);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [isNewEntry, setIsNewEntry] = useState(false);
+
+  // Load entries on component mount
+  useEffect(() => {
+    loadEntries();
+  }, []);
+
+  // Update selected entry when selectedEntryId changes
+  useEffect(() => {
+    if (selectedEntryId) {
+      const entry = journalService.getEntryById(selectedEntryId);
+      setSelectedEntry(entry);
+      setIsNewEntry(false);
+    } else if (isNewEntry) {
+      setSelectedEntry(null);
+    } else {
+      // If no entry is selected and we're not creating a new one,
+      // select the first entry if available
+      if (entries.length > 0 && !isNewEntry) {
+        setSelectedEntryId(entries[0].id);
+      } else {
+        setSelectedEntry(null);
+      }
+    }
+  }, [selectedEntryId, entries, isNewEntry]);
+
+  /**
+   * Load all journal entries from the service
+   */
+  const loadEntries = () => {
+    try {
+      const allEntries = journalService.getAllEntries();
+      setEntries(allEntries);
+      
+      // Select the first entry if available and none is currently selected
+      if (allEntries.length > 0 && !selectedEntryId && !isNewEntry) {
+        setSelectedEntryId(allEntries[0].id);
+      }
+    } catch (error) {
+      console.error('Error loading journal entries:', error);
+    }
+  };
+
+  /**
+   * Handle entry selection
+   * @param {string} entryId - The ID of the selected entry
+   */
+  const handleSelectEntry = (entryId) => {
+    setSelectedEntryId(entryId);
+    setIsNewEntry(false);
+  };
+
+  /**
+   * Handle creating a new entry
+   */
+  const handleCreateEntry = () => {
+    setSelectedEntryId(null);
+    setIsNewEntry(true);
+    setSelectedEntry(createJournalEntry({
+      title: '',
+      content: ''
+    }));
+  };
+
+  /**
+   * Handle saving an entry
+   * @param {Object} savedEntry - The saved entry
+   */
+  const handleSaveEntry = (savedEntry) => {
+    loadEntries(); // Reload all entries
+    setSelectedEntryId(savedEntry.id);
+    setIsNewEntry(false);
+  };
+
+  /**
+   * Handle deleting an entry
+   */
+  const handleDeleteEntry = () => {
+    setSelectedEntryId(null);
+    setSelectedEntry(null);
+    setIsNewEntry(false);
+    loadEntries(); // Reload all entries
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -85,55 +179,66 @@ function App() {
                 gap: 1
               }}
             >
-              <span style={{ color: '#E87A41' }}>*</span> KAVIA AI
+              <span style={{ color: '#E87A41' }}>*</span> Daily Journal
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ ml: 2 }}
-          >
-            Template Button
-          </Button>
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="md">
-        <Box sx={{
-          pt: 15,
-          pb: 8,
-          textAlign: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 3
-        }}>
-          <Typography
-            variant="subtitle1"
-            sx={{ color: '#E87A41', fontWeight: 500 }}
-          >
-            AI Workflow Manager Template
-          </Typography>
-
-          <Typography variant="h1" component="h1">
-            journal_entry_component
-          </Typography>
-
-          <Typography
-            variant="subtitle1"
-            sx={{ maxWidth: '600px', mb: 2 }}
-          >
-            Start building your application.
-          </Typography>
-
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-          >
-            Button
-          </Button>
-        </Box>
+      <Container maxWidth="xl" sx={{ mt: 10, mb: 4 }}>
+        <Grid container spacing={3} sx={{ height: 'calc(100vh - 140px)' }}>
+          {/* Journal Entry List */}
+          <Grid item xs={12} md={4} lg={3} sx={{ height: '100%' }}>
+            <JournalEntryList 
+              onSelectEntry={handleSelectEntry}
+              onCreateEntry={handleCreateEntry}
+              selectedEntryId={selectedEntryId}
+            />
+          </Grid>
+          
+          {/* Journal Entry Detail */}
+          <Grid item xs={12} md={8} lg={9} sx={{ height: '100%' }}>
+            <Paper 
+              elevation={2} 
+              sx={{ 
+                height: '100%', 
+                p: 3,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'auto'
+              }}
+            >
+              {selectedEntry || isNewEntry ? (
+                <JournalEntry 
+                  entry={selectedEntry}
+                  onSave={handleSaveEntry}
+                  onDelete={handleDeleteEntry}
+                  isNew={isNewEntry}
+                />
+              ) : (
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  height: '100%'
+                }}>
+                  <Typography variant="h6" color="text.secondary">
+                    Select an entry or create a new one
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleCreateEntry}
+                    sx={{ mt: 2 }}
+                  >
+                    Create New Entry
+                  </Button>
+                </Box>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
       </Container>
     </ThemeProvider>
   );
