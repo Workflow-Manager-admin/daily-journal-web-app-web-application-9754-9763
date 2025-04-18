@@ -193,9 +193,9 @@ const JournalEntryForm = ({ entry, onSave, onCancel }) => {
   };
 
   return (
-    <Card sx={{ mb: 3, boxShadow: 3 }}>
-      <form onSubmit={handleSubmit}>
-        <CardContent>
+    <Card sx={{ mb: 3, boxShadow: 3, overflow: 'auto', maxHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <CardContent sx={{ flex: 1, overflow: 'auto' }}>
           <Typography variant="h5" component="h2" gutterBottom>
             {entry && entry.id ? 'Edit Journal Entry' : 'New Journal Entry'}
           </Typography>
@@ -307,7 +307,7 @@ const JournalEntryForm = ({ entry, onSave, onCancel }) => {
           </Box>
         </CardContent>
         
-        <CardActions sx={{ justifyContent: 'flex-end', p: 2 }}>
+        <CardActions sx={{ justifyContent: 'flex-end', p: 2, flexShrink: 0 }}>
           <Button
             variant="outlined"
             startIcon={<CancelIcon />}
