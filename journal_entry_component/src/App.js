@@ -158,7 +158,10 @@ function App() {
    * @param {Object} savedEntry - The saved entry
    */
   const handleSaveEntry = (savedEntry) => {
-    loadEntries(); // Reload all entries
+    // Get updated entries directly from the service
+    const updatedEntries = journalService.getAllEntries();
+    setEntries(updatedEntries); // Update entries state immediately
+    
     setSelectedEntryId(savedEntry.id);
     setIsNewEntry(false);
     setShowForm(false);
@@ -210,7 +213,10 @@ function App() {
     setSelectedEntryId(null);
     setSelectedEntry(null);
     setIsNewEntry(false);
-    loadEntries(); // Reload all entries
+    
+    // Get updated entries directly from the service
+    const updatedEntries = journalService.getAllEntries();
+    setEntries(updatedEntries); // Update entries state immediately
   };
 
   return (
@@ -229,7 +235,7 @@ function App() {
                 gap: 1
               }}
             >
-              <span style={{ color: '#E87A41' }}>*</span> Daily Journal
+              <span style={{ color: '#E87A41' }}></span> Personal Jira
             </Typography>
           </Box>
         </Toolbar>
@@ -243,6 +249,7 @@ function App() {
               onSelectEntry={handleSelectEntry}
               onCreateEntry={handleCreateEntry}
               selectedEntryId={selectedEntryId}
+              entries={entries}
             />
           </Grid>
           

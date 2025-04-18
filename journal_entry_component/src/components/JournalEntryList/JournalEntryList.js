@@ -40,9 +40,10 @@ import journalService from '../../services/journalService';
  * @param {Function} props.onSelectEntry - Callback function called when an entry is selected
  * @param {Function} props.onCreateEntry - Callback function called when the create button is clicked
  * @param {string} [props.selectedEntryId] - ID of the currently selected entry
+ * @param {Array} [props.entries] - Array of journal entries to display (optional)
  * @returns {JSX.Element} The JournalEntryList component
  */
-const JournalEntryList = ({ onSelectEntry, onCreateEntry, selectedEntryId }) => {
+const JournalEntryList = ({ onSelectEntry, onCreateEntry, selectedEntryId, entries: entriesProp }) => {
   // State for entries and filtering/sorting
   const [entries, setEntries] = useState([]);
   const [filteredEntries, setFilteredEntries] = useState([]);
@@ -51,10 +52,14 @@ const JournalEntryList = ({ onSelectEntry, onCreateEntry, selectedEntryId }) => 
   const [sortDirection, setSortDirection] = useState('desc');
   const [loading, setLoading] = useState(true);
 
-  // Load entries on component mount
+  // Load entries on component mount or when entriesProp changes
   useEffect(() => {
-    loadEntries();
-  }, []);
+    if (entriesProp && entriesProp.length > 0) {
+      setEntries(entriesProp);
+    } else {
+      loadEntries();
+    }
+  }, [entriesProp]);
 
   // Apply filtering and sorting when entries, searchQuery, sortField, or sortDirection change
   useEffect(() => {
