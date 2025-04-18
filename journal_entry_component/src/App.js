@@ -135,6 +135,8 @@ function App() {
   const handleSelectEntry = (entryId) => {
     setSelectedEntryId(entryId);
     setIsNewEntry(false);
+    setActiveTab(0); // Set view tab as default when clicking an entry
+    setShowForm(false);
   };
 
   /**
@@ -270,11 +272,11 @@ function App() {
                   
                   {/* Show either the JournalEntry view or JournalEntryForm based on activeTab */}
                   {activeTab === 0 ? (
-                    <JournalEntry 
+                    <JournalEntryForm
                       entry={selectedEntry}
                       onSave={handleSaveEntry}
-                      onDelete={handleDeleteEntry}
-                      isNew={isNewEntry}
+                      onCancel={handleCancelForm}
+                      mode="view"
                       onEdit={handleEditEntry}
                     />
                   ) : (
@@ -282,6 +284,7 @@ function App() {
                       entry={selectedEntry}
                       onSave={handleSaveEntry}
                       onCancel={handleCancelForm}
+                      mode="edit"
                     />
                   )}
                 </>

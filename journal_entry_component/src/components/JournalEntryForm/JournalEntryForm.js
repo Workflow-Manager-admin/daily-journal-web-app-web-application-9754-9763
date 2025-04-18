@@ -291,135 +291,154 @@ const JournalEntryForm = ({ entry, onSave, onCancel, mode = 'edit', onEdit }) =>
     );
   };
 
-  // Render edit mode form
-  const renderEditMode = () => {
-    return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-            {/* Title field (optional) */}
-            <TextField
-              label="Title"
-              variant="outlined"
-              fullWidth
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              error={!!errors.title}
-              helperText={errors.title || 'Optional'}
-              autoFocus
-            />
-            
-            {/* Date picker */}
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Date"
-                value={date}
-                onChange={(newDate) => setDate(newDate || new Date())}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    variant: 'outlined',
-                    error: !!errors.createdAt,
-                    helperText: errors.createdAt
-                  }
-                }}
-              />
-            </LocalizationProvider>
-            
-            {/* Content field (required) */}
-            <TextField
-              label="Content"
-              variant="outlined"
-              fullWidth
-              multiline
-              rows={6}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              error={!!errors.content}
-              helperText={errors.content || 'Write your journal entry here'}
-              required
-            />
-            
-            {/* Mood selector (optional) */}
-            <FormControl variant="outlined" fullWidth>
-              <InputLabel id="mood-label">Mood</InputLabel>
-              <Select
-                labelId="mood-label"
-                value={mood}
-                onChange={(e) => setMood(e.target.value)}
-                label="Mood"
-              >
-                <MenuItem value=""><em>None</em></MenuItem>
-                <MenuItem value="happy">Happy</MenuItem>
-                <MenuItem value="sad">Sad</MenuItem>
-                <MenuItem value="excited">Excited</MenuItem>
-                <MenuItem value="anxious">Anxious</MenuItem>
-                <MenuItem value="calm">Calm</MenuItem>
-                <MenuItem value="frustrated">Frustrated</MenuItem>
-                <MenuItem value="grateful">Grateful</MenuItem>
-              </Select>
-              <FormHelperText>Optional</FormHelperText>
-            </FormControl>
-            
-            {/* Tags input (optional) */}
-            <Box>
+  return (
+    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {mode === 'view' ? (
+        <>
+          <CardContent sx={{ flexGrow: 1, overflow: 'auto' }}>
+            {renderViewMode()}
+          </CardContent>
+          <CardActions sx={{ justifyContent: 'flex-end', p: 2, flexShrink: 0 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<EditIcon />}
+              onClick={onEdit}
+            >
+              Edit
+            </Button>
+          </CardActions>
+        </>
+      ) : (
+        <form onSubmit={handleSubmit} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <CardContent sx={{ flexGrow: 1, overflow: 'auto' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+              {/* Title field (optional) */}
               <TextField
-                label="Tags"
+                label="Title"
                 variant="outlined"
                 fullWidth
-                value={currentTag}
-                onChange={(e) => setCurrentTag(e.target.value)}
-                onKeyPress={handleTagKeyPress}
-                helperText="Press Enter to add a tag (optional)"
-                InputProps={{
-                  endAdornment: (
-                    <Button 
-                      onClick={handleAddTag} 
-                      disabled={!currentTag.trim()}
-                      sx={{ ml: 1 }}
-                    >
-                      Add
-                    </Button>
-                  ),
-                }}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                error={!!errors.title}
+                helperText={errors.title || 'Optional'}
+                autoFocus
               />
               
-              {/* Display added tags */}
-              {tags.length > 0 && (
-                <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}>
-                  {tags.map((tag, index) => (
-                    <Chip
-                      key={index}
-                      label={tag}
-                      onDelete={() => handleRemoveTag(tag)}
-                      color="primary"
-                      variant="outlined"
-                      size="small"
-                    />
-                  ))}
-                </Stack>
-              )}
+              {/* Date picker */}
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Date"
+                  value={date}
+                  onChange={(newDate) => setDate(newDate || new Date())}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      variant: 'outlined',
+                      error: !!errors.createdAt,
+                      helperText: errors.createdAt
+                    }
+                  }}
+                />
+              </LocalizationProvider>
+              
+              {/* Content field (required) */}
+              <TextField
+                label="Content"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={6}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                error={!!errors.content}
+                helperText={errors.content || 'Write your journal entry here'}
+                required
+              />
+              
+              {/* Mood selector (optional) */}
+              <FormControl variant="outlined" fullWidth>
+                <InputLabel id="mood-label">Mood</InputLabel>
+                <Select
+                  labelId="mood-label"
+                  value={mood}
+                  onChange={(e) => setMood(e.target.value)}
+                  label="Mood"
+                >
+                  <MenuItem value=""><em>None</em></MenuItem>
+                  <MenuItem value="happy">Happy</MenuItem>
+                  <MenuItem value="sad">Sad</MenuItem>
+                  <MenuItem value="excited">Excited</MenuItem>
+                  <MenuItem value="anxious">Anxious</MenuItem>
+                  <MenuItem value="calm">Calm</MenuItem>
+                  <MenuItem value="frustrated">Frustrated</MenuItem>
+                  <MenuItem value="grateful">Grateful</MenuItem>
+                </Select>
+                <FormHelperText>Optional</FormHelperText>
+              </FormControl>
+              
+              {/* Tags input (optional) */}
+              <Box>
+                <TextField
+                  label="Tags"
+                  variant="outlined"
+                  fullWidth
+                  value={currentTag}
+                  onChange={(e) => setCurrentTag(e.target.value)}
+                  onKeyPress={handleTagKeyPress}
+                  helperText="Press Enter to add a tag (optional)"
+                  InputProps={{
+                    endAdornment: (
+                      <Button 
+                        onClick={handleAddTag} 
+                        disabled={!currentTag.trim()}
+                        sx={{ ml: 1 }}
+                      >
+                        Add
+                      </Button>
+                    ),
+                  }}
+                />
+                
+                {/* Display added tags */}
+                {tags.length > 0 && (
+                  <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}>
+                    {tags.map((tag, index) => (
+                      <Chip
+                        key={index}
+                        label={tag}
+                        onDelete={() => handleRemoveTag(tag)}
+                        color="primary"
+                        variant="outlined"
+                        size="small"
+                      />
+                    ))}
+                  </Stack>
+                )}
+              </Box>
             </Box>
-          </Box>
-        </CardContent>
-        
-        <CardActions sx={{ justifyContent: 'flex-end', p: 2, flexShrink: 0 }}>
-          <Button
-            variant="outlined"
-            startIcon={<CancelIcon />}
-            onClick={handleCancel}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            startIcon={<SaveIcon />}
-            sx={{ ml: 1 }}
-          >
-            Save
-          </Button>
-        </CardActions>
-      </form>
+          </CardContent>
+          
+          <CardActions sx={{ justifyContent: 'flex-end', p: 2, flexShrink: 0 }}>
+            <Button
+              variant="outlined"
+              startIcon={<CancelIcon />}
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              startIcon={<SaveIcon />}
+              sx={{ ml: 1 }}
+            >
+              Save
+            </Button>
+          </CardActions>
+        </form>
+      )}
       
       {/* Notification snackbar */}
       <Snackbar 
