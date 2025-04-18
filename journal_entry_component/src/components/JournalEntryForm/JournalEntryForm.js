@@ -16,13 +16,17 @@ import {
   Snackbar,
   Alert,
   FormHelperText,
-  Divider
+  Divider,
+  Paper
 } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import MoodIcon from '@mui/icons-material/Mood';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 import { validateJournalEntryData, formatDate } from '../../models/JournalEntry';
 import journalService from '../../services/journalService';
@@ -196,15 +200,101 @@ const JournalEntryForm = ({ entry, onSave, onCancel, mode = 'edit', onEdit }) =>
     }
   };
 
-  return (
-    <Card sx={{ mb: 3, boxShadow: 3, overflow: 'auto', maxHeight: '100%', display: 'flex', flexDirection: 'column' }}>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <CardContent sx={{ flex: 1, overflow: 'auto' }}>
-          <Typography variant="h5" component="h2" gutterBottom>
-            {entry && entry.id ? 'Edit Journal Entry' : 'New Journal Entry'}
+  // Get mood display name
+  const getMoodDisplayName = (moodValue) => {
+    const moodMap = {
+      'happy': 'Happy',
+      'sad': 'Sad',
+      'excited': 'Excited',
+      'anxious': 'Anxious',
+      'calm': 'Calm',
+      'frustrated': 'Frustrated',
+      'grateful': 'Grateful'
+    };
+    return moodValue ? moodMap[moodValue] || moodValue : 'Not specified';
+  };
+
+  // Render view mode content
+  const renderViewMode = () => {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <Typography variant="h5" component="h2" gutterBottom>
+          {entry?.title || 'Untitled Entry'}
+        </Typography>
+        
+        <Divider />
+        
+        {/* Date display */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <CalendarTodayIcon color="primary" />
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary">
+              Date
+            </Typography>
+            <Typography variant="body1">
+              {date ? formatDate(date, 'default') : 'Not specified'}
+            </Typography>
+          </Box>
+        </Box>
+        
+        {/* Mood display */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <MoodIcon color="primary" />
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary">
+              Mood
+            </Typography>
+            <Typography variant="body1">
+              {getMoodDisplayName(mood)}
+            </Typography>
+          </Box>
+        </Box>
+        
+        {/* Tags display */}
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+          <LocalOfferIcon color="primary" sx={{ mt: 0.5 }} />
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary">
+              Tags
+            </Typography>
+            {tags && tags.length > 0 ? (
+              <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}>
+                {tags.map((tag, index) => (
+                  <Chip
+                    key={index}
+                    label={tag}
+                    color="primary"
+                    size="small"
+                  />
+                ))}
+              </Stack>
+            ) : (
+              <Typography variant="body1">No tags</Typography>
+            )}
+          </Box>
+        </Box>
+        
+        <Divider />
+        
+        {/* Content display */}
+        <Box>
+          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+            Content
           </Typography>
-          
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+          <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
+            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+              {content || 'No content'}
+            </Typography>
+          </Paper>
+        </Box>
+      </Box>
+    );
+  };
+
+  // Render edit mode form
+  const renderEditMode = () => {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             {/* Title field (optional) */}
             <TextField
               label="Title"
