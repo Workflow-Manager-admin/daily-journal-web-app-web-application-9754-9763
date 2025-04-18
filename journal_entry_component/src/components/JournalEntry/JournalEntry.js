@@ -10,12 +10,16 @@ import {
   IconButton,
   Divider,
   Snackbar,
-  Alert
+  Alert,
+  Chip,
+  Stack
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
+import MoodIcon from '@mui/icons-material/Mood';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 import { formatDate, validateJournalEntryData } from '../../models/JournalEntry';
 import journalService from '../../services/journalService';
@@ -169,6 +173,24 @@ const JournalEntry = ({ entry, onSave, onDelete, isNew = false, onEdit }) => {
     setNotification({ ...notification, open: false });
   };
 
+  /**
+   * Get mood display name from mood value
+   * @param {string} moodValue - The mood value
+   * @returns {string} The display name for the mood
+   */
+  const getMoodDisplayName = (moodValue) => {
+    const moodMap = {
+      'happy': 'Happy',
+      'sad': 'Sad',
+      'excited': 'Excited',
+      'anxious': 'Anxious',
+      'calm': 'Calm',
+      'frustrated': 'Frustrated',
+      'grateful': 'Grateful'
+    };
+    return moodValue ? moodMap[moodValue] || moodValue : 'Not specified';
+  };
+
   // Render the component
   return (
     <Card sx={{ mb: 3, boxShadow: 3 }}>
@@ -209,6 +231,40 @@ const JournalEntry = ({ entry, onSave, onDelete, isNew = false, onEdit }) => {
               {entry && entry.updatedAt > entry.createdAt && 
                 ` (Updated ${formatDate(entry.updatedAt, 'relative')})`}
             </Typography>
+            
+            {/* Display mood if available */}
+            {entry && entry.mood && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 1 }}>
+                <MoodIcon fontSize="small" color="primary" />
+                <Typography variant="body2">
+                  {getMoodDisplayName(entry.mood)}
+                </Typography>
+              </Box>
+            )}
+            
+            {/* Display tags if available */}
+            {entry && entry.tags && entry.tags.length > 0 && (
+              <Box sx={{ mt: 1, mb: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                  <LocalOfferIcon fontSize="small" color="primary" />
+                  <Typography variant="body2" color="text.secondary">
+                    Tags:
+                  </Typography>
+                </Box>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                  {entry.tags.map((tag, index) => (
+                    <Chip
+                      key={index}
+                      label={tag}
+                      color="primary"
+                      size="small"
+                      sx={{ mb: 0.5 }}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+            )}
+            
             <Divider sx={{ my: 1.5 }} />
             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mt: 2 }}>
               {content || 'No content'}
