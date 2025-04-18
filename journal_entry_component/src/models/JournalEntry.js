@@ -10,6 +10,8 @@
  * @property {string} content - Content of the journal entry
  * @property {Date|string} [createdAt] - Date when the journal entry was created
  * @property {Date|string} [updatedAt] - Date when the journal entry was last updated
+ * @property {string} [mood] - The mood associated with the journal entry
+ * @property {string[]} [tags] - Array of tags associated with the journal entry
  */
 
 /**
@@ -26,6 +28,8 @@ class JournalEntry {
     this.content = data.content || '';
     this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
     this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : new Date();
+    this.mood = data.mood || '';
+    this.tags = Array.isArray(data.tags) ? [...data.tags] : [];
   }
 
   /**
@@ -58,6 +62,8 @@ class JournalEntry {
   update(data) {
     if (data.title !== undefined) this.title = data.title;
     if (data.content !== undefined) this.content = data.content;
+    if (data.mood !== undefined) this.mood = data.mood;
+    if (data.tags !== undefined) this.tags = Array.isArray(data.tags) ? [...data.tags] : this.tags;
     this.updatedAt = new Date();
     return this;
   }
@@ -72,7 +78,9 @@ class JournalEntry {
       title: this.title,
       content: this.content,
       createdAt: this.createdAt,
-      updatedAt: this.updatedAt
+      updatedAt: this.updatedAt,
+      mood: this.mood,
+      tags: [...this.tags]
     };
   }
 
