@@ -25,6 +25,10 @@ import SortIcon from '@mui/icons-material/Sort';
 import AddIcon from '@mui/icons-material/Add';
 import ClearIcon from '@mui/icons-material/Clear';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import MoodIcon from '@mui/icons-material/Mood';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import UpdateIcon from '@mui/icons-material/Update';
 
 import { formatDate } from '../../models/JournalEntry';
 import journalService from '../../services/journalService';
@@ -243,6 +247,7 @@ const JournalEntryList = ({ onSelectEntry, onCreateEntry, selectedEntryId }) => 
                   }}
                 >
                   <ListItemText
+                    sx={{ my: 0 }}
                     primary={
                       <Typography 
                         variant="subtitle1" 
@@ -254,14 +259,75 @@ const JournalEntryList = ({ onSelectEntry, onCreateEntry, selectedEntryId }) => 
                       </Typography>
                     }
                     secondary={
-                      <Typography 
-                        variant="body2" 
-                        color="text.secondary" 
-                        component="div"
-                        noWrap
-                      >
-                        {formatDate(entry.updatedAt, 'relative')}
-                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 0.5 }}>
+                        {/* Date and time information */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <CalendarTodayIcon fontSize="small" sx={{ fontSize: '0.875rem', color: 'text.secondary' }} />
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary" 
+                            component="span"
+                            sx={{ mr: 1 }}
+                          >
+                            {formatDate(entry.createdAt, 'short')}
+                          </Typography>
+                          
+                          <UpdateIcon fontSize="small" sx={{ fontSize: '0.875rem', color: 'text.secondary' }} />
+                          <Typography 
+                            variant="body2" 
+                            color="text.secondary" 
+                            component="span"
+                          >
+                            {formatDate(entry.updatedAt, 'relative')}
+                          </Typography>
+                        </Box>
+                        
+                        {/* Mood and tags row */}
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 0.5 }}>
+                          {entry.mood && (
+                            <Box sx={{ display: 'inline-flex', alignItems: 'center', mr: 1 }}>
+                              <MoodIcon fontSize="small" sx={{ fontSize: '0.875rem', color: 'primary.main', mr: 0.5 }} />
+                              <Typography 
+                                variant="body2" 
+                                color="text.secondary" 
+                                component="span"
+                              >
+                                {entry.mood}
+                              </Typography>
+                            </Box>
+                          )}
+                          
+                          {entry.tags && entry.tags.length > 0 && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
+                              <LocalOfferIcon fontSize="small" sx={{ fontSize: '0.875rem', color: 'primary.main' }} />
+                              {entry.tags.slice(0, 2).map((tag, idx) => (
+                                <Chip 
+                                  key={idx} 
+                                  label={tag} 
+                                  size="small" 
+                                  variant="outlined"
+                                  sx={{ 
+                                    height: 20, 
+                                    '& .MuiChip-label': { 
+                                      px: 1, 
+                                      fontSize: '0.7rem' 
+                                    } 
+                                  }} 
+                                />
+                              ))}
+                              {entry.tags.length > 2 && (
+                                <Typography 
+                                  variant="caption" 
+                                  color="text.secondary"
+                                  sx={{ fontSize: '0.7rem' }}
+                                >
+                                  +{entry.tags.length - 2} more
+                                </Typography>
+                              )}
+                            </Box>
+                          )}
+                        </Box>
+                      </Box>
                     }
                   />
                 </ListItemButton>
