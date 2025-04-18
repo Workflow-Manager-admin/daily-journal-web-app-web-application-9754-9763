@@ -85,7 +85,7 @@ function App() {
   const [isNewEntry, setIsNewEntry] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [activeTab, setActiveTab] = useState(0); // 0 for view, 1 for edit/create
-=======
+
 
   // Load entries on component mount
   useEffect(() => {
