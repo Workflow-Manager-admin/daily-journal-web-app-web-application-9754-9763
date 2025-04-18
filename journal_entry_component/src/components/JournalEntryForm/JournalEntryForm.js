@@ -15,14 +15,16 @@ import {
   Stack,
   Snackbar,
   Alert,
-  FormHelperText
+  FormHelperText,
+  Divider
 } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from '@mui/icons-material/Edit';
 
-import { validateJournalEntryData } from '../../models/JournalEntry';
+import { validateJournalEntryData, formatDate } from '../../models/JournalEntry';
 import journalService from '../../services/journalService';
 
 /**
@@ -32,9 +34,11 @@ import journalService from '../../services/journalService';
  * @param {Object} [props.entry] - Existing journal entry for editing (optional)
  * @param {Function} props.onSave - Callback function called after successful save
  * @param {Function} props.onCancel - Callback function called when form is cancelled
+ * @param {string} [props.mode='edit'] - The mode of the form ('edit' or 'view')
+ * @param {Function} [props.onEdit] - Callback function called when edit button is clicked in view mode
  * @returns {JSX.Element} The JournalEntryForm component
  */
-const JournalEntryForm = ({ entry, onSave, onCancel }) => {
+const JournalEntryForm = ({ entry, onSave, onCancel, mode = 'edit', onEdit }) => {
   // State for form fields
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
