@@ -1,370 +1,219 @@
 import React, { useState, useEffect } from 'react';
+import { TextField, Button, Paper, Typography, Container, Box } from '@mui/material';
+import { user } from '../../utils/userAuth';
+import { createJournalEntry } from '../../models/JournalEntry';
 import {
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  TextField,
-  Button,
-  Box,
-  IconButton,
-  Divider,
-  Snackbar,
-  Alert,
-  Chip,
-  Stack,
-  Grid,
-  Paper
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
-import DeleteIcon from '@mui/icons-material/Delete';
-import MoodIcon from '@mui/icons-material/Mood';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import UpdateIcon from '@mui/icons-material/Update';
-
-import { formatDate, validateJournalEntryData } from '../../models/JournalEntry';
-import journalService from '../../services/journalService';
+  getAllEntries,
+  createEntry,
+  updateEntry,
+  deleteEntry
+} from '../../services/journalService';
+import './JournalEntry.css';
 
 /**
- * JournalEntry component for displaying and editing a single journal entry.
- * 
- * @param {Object} props - Component props
- * @param {Object} props.entry - The journal entry object to display/edit
- * @param {Function} props.onSave - Callback function called after successful save
- * @param {Function} props.onDelete - Callback function called after successful delete
- * @param {boolean} props.isNew - Whether this is a new entry being created
- * @param {Function} props.onEdit - Callback function called when edit button is clicked
- * @returns {JSX.Element} The JournalEntry component
+ * JournalEntry component for creating and managing journal entries.
+ * Uses static user details for direct access.
  */
-const JournalEntry = ({ entry, onSave, onDelete, isNew = false, onEdit }) => {
-  // State for managing the entry data
+const JournalEntry = () => {
+  // State for form fields
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [isEditing, setIsEditing] = useState(isNew);
-  const [errors, setErrors] = useState({});
-  const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
+  const [entries, setEntries] = useState([]);
+  const [currentEntry, setCurrentEntry] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Initialize state from entry prop when it changes
+  // Load existing entries on component mount
   useEffect(() => {
-    if (entry) {
-      setTitle(entry.title || '');
-      setContent(entry.content || '');
-    }
-  }, [entry]);
+    loadEntries();
+  }, []);
 
   /**
-   * Handle editing mode toggle
+   * Load all journal entries from the service
    */
-  const handleEditToggle = () => {
-    if (isEditing) {
-      // If canceling edit, reset to original values
-      setTitle(entry?.title || '');
-      setContent(entry?.content || '');
-      setErrors({});
-    } else if (onEdit && typeof onEdit === 'function') {
-      // If entering edit mode and onEdit prop is provided, call it
-      onEdit();
-      return;
-    }
-    setIsEditing(!isEditing);
+  const loadEntries = () => {
+    const allEntries = getAllEntries();
+    setEntries(allEntries);
   };
 
   /**
-   * Handle saving the journal entry
+   * Handle form submission for creating/updating entries
+   * @param {Event} e - Form submission event
    */
-  const handleSave = () => {
-    // Validate the entry data
-    const entryData = { title, content };
-    const validation = validateJournalEntryData(entryData);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError(null);
 
-    if (!validation.isValid) {
-      setErrors(validation.errors);
-      return;
-    }
-
-    try {
-      let result;
-
-      if (isNew) {
-        // Create a new entry
-        result = journalService.createEntry(entryData);
-      } else {
-        // Update existing entry
-        result = journalService.updateEntry(entry.id, entryData);
-      }
-
-      if (result.errors) {
-        setErrors(result.errors);
-        setNotification({
-          open: true,
-          message: 'Failed to save journal entry',
-          severity: 'error'
-        });
-        return;
-      }
-
-      // Clear errors and exit editing mode
-      setErrors({});
-      setIsEditing(false);
-      
-      // Show success notification
-      setNotification({
-        open: true,
-        message: isNew ? 'Journal entry created successfully' : 'Journal entry updated successfully',
-        severity: 'success'
-      });
-
-      // Call the onSave callback if provided
-      if (onSave && typeof onSave === 'function') {
-        onSave(result.entry);
-      }
-    } catch (error) {
-      console.error('Error saving journal entry:', error);
-      setNotification({
-        open: true,
-        message: 'An unexpected error occurred',
-        severity: 'error'
-      });
-    }
-  };
-
-  /**
-   * Handle deleting the journal entry
-   */
-  const handleDelete = () => {
-    if (!entry || !entry.id) return;
-
-    try {
-      const result = journalService.deleteEntry(entry.id);
-
-      if (!result.success) {
-        setNotification({
-          open: true,
-          message: 'Failed to delete journal entry',
-          severity: 'error'
-        });
-        return;
-      }
-
-      // Show success notification
-      setNotification({
-        open: true,
-        message: 'Journal entry deleted successfully',
-        severity: 'success'
-      });
-
-      // Call the onDelete callback if provided
-      if (onDelete && typeof onDelete === 'function') {
-        onDelete(entry.id);
-      }
-    } catch (error) {
-      console.error('Error deleting journal entry:', error);
-      setNotification({
-        open: true,
-        message: 'An unexpected error occurred',
-        severity: 'error'
-      });
-    }
-  };
-
-  /**
-   * Handle closing the notification
-   */
-  const handleCloseNotification = () => {
-    setNotification({ ...notification, open: false });
-  };
-
-  /**
-   * Get mood display name from mood value
-   * @param {string} moodValue - The mood value
-   * @returns {string} The display name for the mood
-   */
-  const getMoodDisplayName = (moodValue) => {
-    const moodMap = {
-      'happy': 'Happy',
-      'sad': 'Sad',
-      'excited': 'Excited',
-      'anxious': 'Anxious',
-      'calm': 'Calm',
-      'frustrated': 'Frustrated',
-      'grateful': 'Grateful'
+    const entryData = {
+      title: title.trim(),
+      content: content.trim(),
+      userId: user.username, // Using static user details
     };
-    return moodValue ? moodMap[moodValue] || moodValue : 'Not specified';
+
+    try {
+      if (currentEntry) {
+        // Update existing entry
+        const { entry, errors } = updateEntry(currentEntry.id, entryData);
+        if (errors) {
+          setError(Object.values(errors).join(', '));
+          return;
+        }
+        setCurrentEntry(null);
+      } else {
+        // Create new entry
+        const { entry, errors } = createEntry(entryData);
+        if (errors) {
+          setError(Object.values(errors).join(', '));
+          return;
+        }
+      }
+
+      // Reset form and reload entries
+      setTitle('');
+      setContent('');
+      loadEntries();
+    } catch (err) {
+      setError('An error occurred while saving the entry');
+      console.error('Error saving entry:', err);
+    }
   };
 
-  // Render the component
-  return (
-    <Card sx={{ mb: 3, boxShadow: 3 }}>
-      <CardContent>
-        {isEditing ? (
-          // Edit mode
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Title"
-              variant="outlined"
-              fullWidth
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              error={!!errors.title}
-              helperText={errors.title}
-              autoFocus
-            />
-            <TextField
-              label="Content"
-              variant="outlined"
-              fullWidth
-              multiline
-              rows={4}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              error={!!errors.content}
-              helperText={errors.content}
-            />
-          </Box>
-        ) : (
-          // View mode
-          <Box>
-            <Typography variant="h5" component="h2" gutterBottom>
-              {title || 'Untitled Entry'}
-            </Typography>
-            
-            {/* Metadata section with clear visual separation */}
-            <Paper 
-              variant="outlined" 
-              sx={{ 
-                p: 1.5, 
-                mb: 2, 
-                backgroundColor: 'rgba(0, 0, 0, 0.02)',
-                borderRadius: 1
-              }}
-            >
-              <Grid container spacing={2}>
-                {/* Date and time information */}
-                <Grid item xs={12} sm={6}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CalendarTodayIcon fontSize="small" color="primary" />
-                    <Typography variant="body2" color="text.secondary">
-                      Created: {entry && formatDate(entry.createdAt, 'default')}
-                    </Typography>
-                  </Box>
-                  {entry && entry.updatedAt > entry.createdAt && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                      <UpdateIcon fontSize="small" color="primary" />
-                      <Typography variant="body2" color="text.secondary">
-                        Updated: {formatDate(entry.updatedAt, 'default')}
-                      </Typography>
-                    </Box>
-                  )}
-                </Grid>
-                
-                {/* Mood information */}
-                {entry && entry.mood && (
-                  <Grid item xs={12} sm={6}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <MoodIcon fontSize="small" color="primary" />
-                      <Typography variant="body2" fontWeight="medium">
-                        {getMoodDisplayName(entry.mood)}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                )}
-                
-                {/* Tags information */}
-                {entry && entry.tags && entry.tags.length > 0 && (
-                  <Grid item xs={12}>
-                    <Divider sx={{ my: 1 }} />
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <LocalOfferIcon fontSize="small" color="primary" />
-                      <Typography variant="body2" color="text.secondary" fontWeight="medium">
-                        Tags
-                      </Typography>
-                    </Box>
-                    <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
-                      {entry.tags.map((tag, index) => (
-                        <Chip
-                          key={index}
-                          label={tag}
-                          color="primary"
-                          size="small"
-                          sx={{ mb: 0.5 }}
-                        />
-                      ))}
-                    </Stack>
-                  </Grid>
-                )}
-              </Grid>
-            </Paper>
-            
-            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-              {content || 'No content'}
-            </Typography>
-          </Box>
-        )}
-      </CardContent>
+  /**
+   * Handle editing an existing entry
+   * @param {Object} entry - The entry to edit
+   */
+  const handleEdit = (entry) => {
+    setCurrentEntry(entry);
+    setTitle(entry.title);
+    setContent(entry.content);
+  };
 
-      <CardActions sx={{ justifyContent: 'flex-end', p: 2 }}>
-        {isEditing ? (
-          // Edit mode actions
-          <>
+  /**
+   * Handle deleting an entry
+   * @param {string} id - ID of the entry to delete
+   */
+  const handleDelete = (id) => {
+    try {
+      const { success, errors } = deleteEntry(id);
+      if (!success) {
+        setError(Object.values(errors).join(', '));
+        return;
+      }
+      loadEntries();
+    } catch (err) {
+      setError('An error occurred while deleting the entry');
+      console.error('Error deleting entry:', err);
+    }
+  };
+
+  return (
+    <Container className="journal-entry-container">
+      <Box className="user-info">
+        <Typography variant="h6">
+          Welcome, {user.username}!
+        </Typography>
+      </Box>
+
+      <Paper elevation={3} className="entry-form">
+        <form onSubmit={handleSubmit}>
+          <Typography variant="h5" gutterBottom>
+            {currentEntry ? 'Edit Journal Entry' : 'New Journal Entry'}
+          </Typography>
+
+          {error && (
+            <Typography color="error" gutterBottom>
+              {error}
+            </Typography>
+          )}
+
+          <TextField
+            label="Title"
+            variant="outlined"
+            fullWidth
+            required
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            margin="normal"
+          />
+
+          <TextField
+            label="Content"
+            variant="outlined"
+            fullWidth
+            required
+            multiline
+            rows={4}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            margin="normal"
+          />
+
+          <Box className="form-actions">
             <Button
-              variant="outlined"
-              startIcon={<CancelIcon />}
-              onClick={handleEditToggle}
-            >
-              Cancel
-            </Button>
-            <Button
+              type="submit"
               variant="contained"
               color="primary"
-              startIcon={<SaveIcon />}
-              onClick={handleSave}
-              sx={{ ml: 1 }}
+              className="submit-button"
             >
-              Save
+              {currentEntry ? 'Update Entry' : 'Save Entry'}
             </Button>
-          </>
-        ) : (
-          // View mode actions
-          <>
-            {!isNew && (
-              <IconButton 
-                color="error" 
-                onClick={handleDelete}
-                aria-label="delete"
-              >
-                <DeleteIcon />
-              </IconButton>
-            )}
-            <IconButton 
-              color="primary" 
-              onClick={handleEditToggle}
-              aria-label="edit"
-            >
-              <EditIcon />
-            </IconButton>
-          </>
-        )}
-      </CardActions>
 
-      {/* Notification snackbar */}
-      <Snackbar 
-        open={notification.open} 
-        autoHideDuration={6000} 
-        onClose={handleCloseNotification}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert 
-          onClose={handleCloseNotification} 
-          severity={notification.severity} 
-          sx={{ width: '100%' }}
-        >
-          {notification.message}
-        </Alert>
-      </Snackbar>
-    </Card>
+            {currentEntry && (
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => {
+                  setCurrentEntry(null);
+                  setTitle('');
+                  setContent('');
+                }}
+              >
+                Cancel Edit
+              </Button>
+            )}
+          </Box>
+        </form>
+      </Paper>
+
+      <Box className="entries-list">
+        <Typography variant="h5" gutterBottom>
+          Your Journal Entries
+        </Typography>
+
+        {entries.length === 0 ? (
+          <Typography variant="body1">
+            No entries yet. Create your first journal entry above!
+          </Typography>
+        ) : (
+          entries.map((entry) => (
+            <Paper key={entry.id} elevation={2} className="entry-item">
+              <Box className="entry-content">
+                <Typography variant="h6">{entry.title}</Typography>
+                <Typography variant="body1">{entry.content}</Typography>
+                <Typography variant="caption" className="entry-date">
+                  Created: {new Date(entry.createdAt).toLocaleString()}
+                </Typography>
+              </Box>
+              <Box className="entry-actions">
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => handleEdit(entry)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => handleDelete(entry.id)}
+                >
+                  Delete
+                </Button>
+              </Box>
+            </Paper>
+          ))
+        )}
+      </Box>
+    </Container>
   );
 };
 

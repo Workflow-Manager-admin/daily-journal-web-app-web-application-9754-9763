@@ -5,8 +5,8 @@
  */
 
 class WebSocketService {
-    constructor(url = 'ws://localhost:8080') {
-        this.url = url;
+    constructor(url) {
+        this.url = url || process.env.REACT_APP_WS_URL || 'ws://localhost:3001/ws';
         this.ws = null;
         this.isConnected = false;
         this.reconnectAttempts = 0;
@@ -14,6 +14,7 @@ class WebSocketService {
         this.baseReconnectDelay = 1000; // Start with 1 second delay
         this.messageCallbacks = new Set();
         this.statusCallbacks = new Set();
+        this.protocols = []; // Remove protocol restrictions for better compatibility
     }
 
     /**
@@ -22,7 +23,7 @@ class WebSocketService {
      */
     connect() {
         try {
-            this.ws = new WebSocket(this.url);
+            this.ws = this.protocols.length > 0 ? new WebSocket(this.url, this.protocols) : new WebSocket(this.url);
             this.setupEventHandlers();
         } catch (error) {
             console.error('WebSocket connection error:', error);

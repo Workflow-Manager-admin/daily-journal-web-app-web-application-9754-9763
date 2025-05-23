@@ -224,41 +224,50 @@ const JournalEntryForm = ({ entry, onSave, onCancel, mode = 'edit', onEdit }) =>
         
         <Divider />
         
-        {/* Date display */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <CalendarTodayIcon color="primary" />
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary">
-              Date
-            </Typography>
+        {/* Metadata section with horizontal layout */}
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' }, 
+          gap: 3,
+          alignItems: { xs: 'flex-start', sm: 'stretch' },
+          '& > *': { flex: 1 }
+        }}>
+          {/* Date display */}
+          <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.default' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <CalendarTodayIcon color="primary" />
+              <Typography variant="subtitle2" color="text.secondary">
+                Date
+              </Typography>
+            </Box>
             <Typography variant="body1">
               {date ? formatDate(date, 'default') : 'Not specified'}
             </Typography>
-          </Box>
-        </Box>
-        
-        {/* Mood display */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <MoodIcon color="primary" />
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary">
-              Mood
-            </Typography>
+          </Paper>
+          
+          {/* Mood display */}
+          <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.default' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <MoodIcon color="primary" />
+              <Typography variant="subtitle2" color="text.secondary">
+                Mood
+              </Typography>
+            </Box>
             <Typography variant="body1">
               {getMoodDisplayName(mood)}
             </Typography>
-          </Box>
-        </Box>
-        
-        {/* Tags display */}
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-          <LocalOfferIcon color="primary" sx={{ mt: 0.5 }} />
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary">
-              Tags
-            </Typography>
+          </Paper>
+          
+          {/* Tags display */}
+          <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.default' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <LocalOfferIcon color="primary" />
+              <Typography variant="subtitle2" color="text.secondary">
+                Tags
+              </Typography>
+            </Box>
             {tags && tags.length > 0 ? (
-              <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}>
+              <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
                 {tags.map((tag, index) => (
                   <Chip
                     key={index}
@@ -271,7 +280,7 @@ const JournalEntryForm = ({ entry, onSave, onCancel, mode = 'edit', onEdit }) =>
             ) : (
               <Typography variant="body1">No tags</Typography>
             )}
-          </Box>
+          </Paper>
         </Box>
         
         <Divider />

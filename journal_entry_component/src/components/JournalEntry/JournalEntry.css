@@ -1,0 +1,78 @@
+/* Container styles */
+.journal-entry-container {
+  padding: 2rem 0;
+  max-width: 800px !important;
+}
+
+/* User info section */
+.user-info {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* Entry form styles */
+.entry-form {
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.submit-button {
+  min-width: 120px;
+}
+
+/* Entries list styles */
+.entries-list {
+  margin-top: 3rem;
+}
+
+.entry-item {
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.entry-content {
+  flex: 1;
+}
+
+.entry-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+.entry-date {
+  display: block;
+  margin-top: 0.5rem;
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .entry-item {
+    flex-direction: column;
+  }
+
+  .entry-actions {
+    margin-left: 0;
+    margin-top: 1rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}

@@ -92,8 +92,8 @@ const JournalEntryList = ({ onSelectEntry, onCreateEntry, selectedEntryId, entri
       result = journalService.searchEntries(searchQuery);
     }
 
-    // Apply sorting
-    result = journalService.sortEntries(sortField, sortDirection);
+    // Apply sorting to the filtered results
+    result = journalService.sortEntries(result, sortField, sortDirection);
     
     setFilteredEntries(result);
   };

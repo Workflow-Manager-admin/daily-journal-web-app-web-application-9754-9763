@@ -239,9 +239,19 @@ export const searchEntries = (query) => {
   const normalizedQuery = query.toLowerCase().trim();
   
   return entries.filter(entry => {
-    const titleMatch = entry.title.toLowerCase().includes(normalizedQuery);
-    const contentMatch = entry.content.toLowerCase().includes(normalizedQuery);
-    return titleMatch || contentMatch;
+    // Search in title and content
+    const titleMatch = entry.title?.toLowerCase().includes(normalizedQuery);
+    const contentMatch = entry.content?.toLowerCase().includes(normalizedQuery);
+    
+    // Search in mood
+    const moodMatch = entry.mood?.toLowerCase().includes(normalizedQuery);
+    
+    // Search in tags
+    const tagsMatch = entry.tags?.some(tag => 
+      tag.toLowerCase().includes(normalizedQuery)
+    );
+    
+    return titleMatch || contentMatch || moodMatch || tagsMatch;
   });
 };
 
@@ -262,13 +272,15 @@ export const filterEntries = (filterFn) => {
 
 /**
  * Sort journal entries by a specified field and direction.
+ * @param {Array<JournalEntry>} [entriesToSort] - Optional array of entries to sort. If not provided, all entries will be retrieved.
  * @param {string} field - The field to sort by (e.g., 'createdAt', 'title').
  * @param {string} [direction='desc'] - The sort direction ('asc' or 'desc').
  * @returns {Array<JournalEntry>} Array of sorted journal entries.
  * @public
  */
-export const sortEntries = (field, direction = 'desc') => {
-  const entries = getEntriesFromStorage();
+export const sortEntries = (entriesToSort, field, direction = 'desc') => {
+  // If no entries provided, get all entries from storage
+  const entries = Array.isArray(entriesToSort) ? entriesToSort : getEntriesFromStorage();
   
   if (!field || !entries.length || !entries[0].hasOwnProperty(field)) {
     return entries;
